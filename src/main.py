@@ -3,12 +3,11 @@
 import pygame
 from player import Player
 from tile_map import Map
+from ray import Ray
 
 
 WINDOW_SIZE = (750, 750)
 FRAME_RATE  = 60
-
-
 TILE_MAP = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
@@ -22,7 +21,7 @@ TILE_MAP = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 def main():
@@ -35,6 +34,7 @@ def main():
     tile_map.log_tiles()
 
     player = Player(pygame.Vector2(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2))
+    ray = Ray(player.pos, player.dir)
 
     # command design pattern wannabe...
     # TODO: Better implementation of the pattern
@@ -64,12 +64,14 @@ def main():
         # UPDATING
         player.update_dir(movement["angular"])
         player.update_pos(movement["linear"])
+        ray.cast(tile_map)
 
 
         # RENDERING
         display.fill("black")
         tile_map.draw(display)
         player.draw(display)
+        ray.draw(display)
         pygame.display.update()
 
 

@@ -27,10 +27,10 @@ class Map():
                                              self.tile_size,
                                              self.tile_size)
                 if j == 0:
-                    pygame.draw.rect(surface, "white", tile_rect)
+                    pygame.draw.rect(surface, "black", tile_rect)
                 elif j == 1:
                     pygame.draw.rect(surface, "blue", tile_rect)
-                pygame.draw.rect(surface, "black", tile_rect, 1)
+                pygame.draw.rect(surface, "white", tile_rect, 1)
 
                 x_offset += self.tile_size
 
