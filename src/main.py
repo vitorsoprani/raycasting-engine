@@ -2,16 +2,37 @@
 
 import pygame
 from player import Player
+from tile_map import Map
 
 
-
-WINDOW_SIZE = (640, 480)
+WINDOW_SIZE = (750, 750)
 FRAME_RATE  = 60
+
+
+TILE_MAP = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 def main():
     pygame.init()
     display = pygame.display.set_mode(WINDOW_SIZE)
     clock = pygame.time.Clock()
+
+    tile_map = Map(50, 15, 15)
+    tile_map.load_from_list(TILE_MAP)
+    tile_map.log_tiles()
 
     player = Player(pygame.Vector2(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2))
 
@@ -38,7 +59,6 @@ def main():
             movement["linear"] -= 1
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             movement["angular"] += 1
-        print(movement)
 
 
         # UPDATING
@@ -48,6 +68,7 @@ def main():
 
         # RENDERING
         display.fill("black")
+        tile_map.draw(display)
         player.draw(display)
         pygame.display.update()
 
