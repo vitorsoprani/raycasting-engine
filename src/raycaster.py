@@ -10,6 +10,7 @@ class Ray():
         self.length = 0.0
         self.hit = False
         self.side = None
+        self.relative_x = None
 
     def cast(self, tile_map: Map):
         tile_size = tile_map.tile_size
@@ -48,14 +49,18 @@ class Ray():
                 self.hit = False
                 break
 
-            if tile_map.tiles[map_y][map_x] != 0:
+            # Can't use tile_map.check_pos() because map_y and map_x are NOT
+            # relative to the player coordinates (self.pos)
+            if tile_map.tiles[map_y][map_x].id != 0:
                 self.hit = True
                 break
 
         if self.side == "x":
             self.length = (x_length - scaling_x) * tile_size
+            self.rel_x = (self.pos + (self.dir * self.length)).x % tile_size
         else:
             self.length = (y_length - scaling_y) * tile_size
+            self.rel_x = (self.pos + (self.dir * self.length)).y % tile_size
 
     def draw(self, surface: pygame.Surface):
         pygame.draw.line(surface,
@@ -88,7 +93,8 @@ class RayCaster():
 
     def render_3d(self, surface: pygame.Surface, horizon: int):
         h = surface.get_height()
-        w = int(surface.get_width() / self.n_rays + 0.5) # round up
+        # TODO: better calculation for the rectangles width
+        w = int((surface.get_width() + self.n_rays - 1) / self.n_rays) # round up
         max_depth = 200
 
         for i, ray in enumerate(self.rays):
@@ -100,6 +106,8 @@ class RayCaster():
 
             color = pygame.Color("red") if ray.side == "x" else pygame.Color("darkred")
             color = color.lerp((0, 0, 0), min(1, ray.length / max_depth))
+
+
             ray_h = (h / ray.length) * self.tile_map.tile_size
             rect = pygame.Rect(w * i, horizon - (ray_h / 2), w, ray_h)
             pygame.draw.rect(surface, color, rect)
