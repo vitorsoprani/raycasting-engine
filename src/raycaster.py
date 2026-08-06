@@ -2,6 +2,7 @@ import math
 import pygame
 from tile_map import Map
 
+
 class Ray():
     def __init__(self, pos: pygame.Vector2, dir: pygame.Vector2):
         self.pos = pos
@@ -58,7 +59,51 @@ class Ray():
 
     def draw(self, surface: pygame.Surface):
         pygame.draw.line(surface,
-                         "green",
+                         "white",
                          self.pos,
                          self.pos + self.dir * self.length)
+
+
+class RayCaster():
+    def __init__(self, tile_map: Map, fov: float, n_rays: int):
+        self.tile_map = tile_map
+        self.fov = fov
+        self.n_rays = n_rays
+        self.rays = [Ray(pygame.Vector2(), pygame.Vector2()) for _ in range(n_rays)]
+
+    def cast_all(self, pos: pygame.Vector2, dir: pygame.Vector2):
+        angle_step = self.fov / self.n_rays
+        ray_dir = dir.rotate(-self.fov / 2)
+
+        for ray in self.rays:
+            ray.pos.update(pos)
+            ray.dir.update(ray_dir)
+            ray.cast(self.tile_map)
+
+            ray_dir.rotate_ip(angle_step)
+
+    def draw_all(self, surface: pygame.Surface):
+        for ray in self.rays:
+            ray.draw(surface)
+
+    def render_3d(self, surface: pygame.Surface, horizon: int):
+        h = surface.get_height()
+        w = int(surface.get_width() / self.n_rays + 0.5) # round up
+        max_depth = 200
+
+        for i, ray in enumerate(self.rays):
+            if not ray.hit:
+                continue
+
+            if ray.length == 0:
+                continue
+
+            color = pygame.Color("red") if ray.side == "x" else pygame.Color("darkred")
+            color = color.lerp((0, 0, 0), min(1, ray.length / max_depth))
+            ray_h = (h / ray.length) * self.tile_map.tile_size
+            rect = pygame.Rect(w * i, horizon - (ray_h / 2), w, ray_h)
+            pygame.draw.rect(surface, color, rect)
+
+
+
 
