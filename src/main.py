@@ -3,26 +3,35 @@
 import pygame
 from player import Player
 from tile_map import Map
-from ray import Ray
+from raycaster import RayCaster
 
 
-WINDOW_SIZE = (750, 750)
+WINDOW_SIZE = (1280, 720)
 FRAME_RATE  = 60
 TILE_MAP = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+            [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
+            [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
+            [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+MOUSE_X_SENSITIVITY = 0.08
+MOUSE_Y_SENSITIVITY = 1
+
+MIN_HORIZON = int(WINDOW_SIZE[1] / 8)
+MAX_HORIZON = WINDOW_SIZE[1] - MIN_HORIZON
+
+FOV = 75
+RESOLUTION = 300
 
 def main():
     pygame.init()
@@ -32,50 +41,76 @@ def main():
     tile_map = Map(50, 15, 15)
     tile_map.load_from_list(TILE_MAP)
     tile_map.log_tiles()
+    minimap = pygame.Surface(tile_map.get_size())
+    horizon = int(WINDOW_SIZE[1] / 2)
 
     player = Player(pygame.Vector2(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2))
-    ray = Ray(player.pos, player.dir)
+    raycaster = RayCaster(tile_map, FOV, RESOLUTION)
 
     # command design pattern wannabe...
     # TODO: Better implementation of the pattern
-    movement = {"linear": 0, "angular": 0}
+    movement = {"horizontal": 0, "vertical": 0, "angular": 0}
+    pygame.event.set_grab(True)
+    pygame.mouse.set_visible(False)
 
     running = True
     while running:
         # HANDLING INPUT
-        movement["linear"] = 0
+        movement["vertical"] = 0
+        movement["horizontal"] = 0
         movement["angular"] = 0
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w] or keys[pygame.K_UP]:
-            movement["linear"] += 1
-        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            movement["angular"] -= 1
+            movement["vertical"] += 1
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-            movement["linear"] -= 1
-        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            movement["vertical"] -= 1
+        if keys[pygame.K_a]:
+            movement["horizontal"] -= 1
+        if keys[pygame.K_d]:
+            movement["horizontal"] += 1
+        if keys[pygame.K_LEFT]:
+            movement["angular"] -= 1
+        if keys[pygame.K_RIGHT]:
             movement["angular"] += 1
 
+        mouse_rel_mov = pygame.mouse.get_rel()
+        movement["angular"] = int(mouse_rel_mov[0] * MOUSE_X_SENSITIVITY)
+        horizon -= int(mouse_rel_mov[1] * MOUSE_Y_SENSITIVITY)
+        print(horizon)
+        print(MAX_HORIZON)
+        print(MIN_HORIZON)
+        if horizon > MAX_HORIZON:
+            horizon = MAX_HORIZON
+
+        if horizon < MIN_HORIZON:
+            horizon = MIN_HORIZON
 
         # UPDATING
         player.update_dir(movement["angular"])
-        player.update_pos(movement["linear"])
-        ray.cast(tile_map)
+        player.update_pos(movement["vertical"], movement["horizontal"], tile_map)
+        raycaster.cast_all(player.pos, player.dir)
 
 
         # RENDERING
         display.fill("black")
-        tile_map.draw(display)
-        player.draw(display)
-        ray.draw(display)
+        tile_map.draw(minimap)
+        player.draw(minimap)
+        raycaster.draw_all(minimap)
+        raycaster.render_3d(display, horizon)
+        display.blit(pygame.transform.scale(minimap, (100, 100)), (0, 0))
         pygame.display.update()
 
 
         clock.tick(FRAME_RATE)
+        print(clock.get_fps())
 
     pygame.quit()
 

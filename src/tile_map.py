@@ -29,8 +29,7 @@ class Map():
                 if j == 0:
                     pygame.draw.rect(surface, "black", tile_rect)
                 elif j == 1:
-                    pygame.draw.rect(surface, "blue", tile_rect)
-                pygame.draw.rect(surface, "white", tile_rect, 1)
+                    pygame.draw.rect(surface, "white", tile_rect)
 
                 x_offset += self.tile_size
 
@@ -40,4 +39,13 @@ class Map():
     def log_tiles(self):
         for row in self.tiles:
             print(row)
+
+    def get_size(self):
+        return (self.cols * self.tile_size, self.rows * self.tile_size)
+
+    def check_pos(self, pos: pygame.Vector2):
+        tile_y = int(pos.y / self.tile_size)
+        tile_x = int(pos.x / self.tile_size)
+
+        return self.tiles[tile_y][tile_x]
 
