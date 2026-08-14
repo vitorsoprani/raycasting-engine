@@ -36,7 +36,7 @@ MIN_HORIZON = int(WINDOW_SIZE[1] / 8)
 MAX_HORIZON = WINDOW_SIZE[1] - MIN_HORIZON
 
 FOV = 60
-RESOLUTION = 640
+RESOLUTION = 100
 
 def main():
     pygame.init()
@@ -49,7 +49,7 @@ def main():
     minimap = pygame.Surface(tile_map.get_size())
     horizon = int(WINDOW_SIZE[1] / 2)
 
-    player = Player(pygame.Vector2(TILE_SIZE, TILE_SIZE))
+    player = Player(pygame.Vector2(TILE_SIZE + 10, TILE_SIZE + 10))
     raycaster = RayCaster(tile_map, FOV, RESOLUTION)
 
     # command design pattern wannabe...
@@ -107,7 +107,7 @@ def main():
         player.draw(minimap)
         raycaster.draw_all(minimap)
         raycaster.render_3d(display, horizon)
-        display.blit(pygame.transform.scale(minimap, (100, 100)), (0, 0))
+        display.blit(pygame.transform.scale(minimap, (200, 200)), (0, 0))
         pygame.display.update()
 
 

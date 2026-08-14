@@ -2,8 +2,6 @@ import pygame
 import os
 
 class Tile():
-    # TODO: make all tiles from the same tipe refer to the same object.
-    # there is no reason to load one for each map position
     def __init__(self, id: int, image: pygame.Surface):
         self.resolution = 32
         self.id = id

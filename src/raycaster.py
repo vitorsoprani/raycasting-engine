@@ -16,7 +16,11 @@ class Ray():
         tile_size = tile_map.tile_size
 
         scaling_x = abs(1 / self.dir.x) if self.dir.x != 0 else math.inf
+        scaling_x *= tile_size
+
         scaling_y = abs(1 / self.dir.y) if self.dir.y != 0 else math.inf
+        scaling_y *= tile_size
+
 
         map_x = int(self.pos.x / tile_size)
         map_y = int(self.pos.y / tile_size)
@@ -56,14 +60,16 @@ class Ray():
                 break
 
         if self.side == "x":
-            self.length = (x_length - scaling_x) * tile_size
+            self.length = (x_length - scaling_x)
             self.rel_x = (self.pos + (self.dir * self.length)).x % tile_size
         else:
-            self.length = (y_length - scaling_y) * tile_size
+            self.length = (y_length - scaling_y)
             self.rel_x = (self.pos + (self.dir * self.length)).y % tile_size
 
         self.rel_x = self.rel_x / tile_size
-        print(self.length)
+        print(f"pos: {self.pos}, dir: {self.dir}, length: {self.length}")
+        print(f"final_pos: {(self.pos + (self.dir * self.length))}")
+        print(f"rel_x: {self.rel_x}")
 
     def draw(self, surface: pygame.Surface):
         pygame.draw.line(surface,
