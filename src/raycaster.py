@@ -10,7 +10,7 @@ class Ray():
         self.length = 0.0
         self.hit = False
         self.side = None
-        self.relative_x = None
+        self.rel_x = 0.0
 
     def cast(self, tile_map: Map):
         tile_size = tile_map.tile_size
@@ -62,6 +62,9 @@ class Ray():
             self.length = (y_length - scaling_y) * tile_size
             self.rel_x = (self.pos + (self.dir * self.length)).y % tile_size
 
+        self.rel_x = self.rel_x / tile_size
+        print(self.length)
+
     def draw(self, surface: pygame.Surface):
         pygame.draw.line(surface,
                          "white",
@@ -97,6 +100,8 @@ class RayCaster():
         w = int((surface.get_width() + self.n_rays - 1) / self.n_rays) # round up
         max_depth = 200
 
+        tile_size = self.tile_map.tile_size
+
         for i, ray in enumerate(self.rays):
             if not ray.hit:
                 continue
@@ -107,10 +112,19 @@ class RayCaster():
             color = pygame.Color("red") if ray.side == "x" else pygame.Color("darkred")
             color = color.lerp((0, 0, 0), min(1, ray.length / max_depth))
 
+            end_pos = ray.pos + ray.dir * ray.length
 
-            ray_h = (h / ray.length) * self.tile_map.tile_size
+
+            ray_h = (h / ray.length) * tile_size
             rect = pygame.Rect(w * i, horizon - (ray_h / 2), w, ray_h)
-            pygame.draw.rect(surface, color, rect)
+
+            map_y = int(end_pos.y / tile_size)
+            map_x = int(end_pos.x / tile_size)
+            tile = self.tile_map.tiles[map_y][map_x]
+            texture = tile.get_texture(ray.rel_x)
+            texture = pygame.transform.scale(texture, (rect.width, rect.height))
+
+            surface.blit(texture, (rect.x, rect.y))
 
 
 

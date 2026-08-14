@@ -5,8 +5,23 @@ class Tile():
     # TODO: make all tiles from the same tipe refer to the same object.
     # there is no reason to load one for each map position
     def __init__(self, id: int, image: pygame.Surface):
+        self.resolution = 32
         self.id = id
         self.image = image
+
+        self.slices: list[pygame.Surface] = []
+        # width must be atleast 1 px, i.e resolution <= image width
+        slice_width = int(self.image.get_width() / self.resolution)
+        slice_height = self.image.get_height()
+        for i in range(self.resolution):
+            rect = pygame.Rect(i * slice_width, 0, slice_width, slice_height)
+            self.slices.append(self.image.subsurface(rect))
+
+    def get_texture(self, rel_x: float):
+        assert 0 <= rel_x and rel_x<= 1
+        slice_idx = int(rel_x * self.resolution)
+        return self.slices[slice_idx]
+
 
 class Map():
     def __init__(self,
