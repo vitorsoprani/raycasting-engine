@@ -48,7 +48,7 @@ class Ray():
                 self.hit = False
                 break
 
-            if tile_map.tiles[map_y][map_x] != 0:
+            if tile_map.tiles[map_y][map_x] > 0:
                 self.hit = True
                 break
 
@@ -89,7 +89,7 @@ class RayCaster():
     def render_3d(self, surface: pygame.Surface, horizon: int):
         h = surface.get_height()
         w = int(surface.get_width() / self.n_rays + 0.5) # round up
-        max_depth = 200
+        max_depth = 100
 
         for i, ray in enumerate(self.rays):
             if not ray.hit:
@@ -98,8 +98,14 @@ class RayCaster():
             if ray.length == 0:
                 continue
 
-            color = pygame.Color("red") if ray.side == "x" else pygame.Color("darkred")
-            color = color.lerp((0, 0, 0), min(1, ray.length / max_depth))
+            ray_end_pos = ray.pos + (ray.dir * ray.length * 1.001)
+
+            if self.tile_map.check_pos(ray_end_pos) == 2:
+                color = pygame.Color("white")
+            else:
+                color = pygame.Color("red") if ray.side == "x" else pygame.Color("darkred")
+                color = color.lerp((0, 0, 0), min(1, ray.length / max_depth))
+
             ray_h = (h / ray.length) * self.tile_map.tile_size
             rect = pygame.Rect(w * i, horizon - (ray_h / 2), w, ray_h)
             pygame.draw.rect(surface, color, rect)

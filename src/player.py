@@ -1,5 +1,4 @@
 import pygame
-from pygame.transform import rotate
 from tile_map import Map
 
 
@@ -12,7 +11,7 @@ class Player():
         self.dir = dir
 
         self.angular_vel = 0.05
-        self.linear_vel = 2.5
+        self.linear_vel = 1.5
 
     def draw(self, surface: pygame.Surface):
         color = "white"
@@ -32,9 +31,13 @@ class Player():
         movement = mov_dir * self.linear_vel
 
         self.pos.y += movement.y
-        if tile_map.check_pos(self.pos) != 0:
+        if tile_map.check_pos(self.pos) > 0:
             self.pos.y -= movement.y
 
         self.pos.x += movement.x
-        if tile_map.check_pos(self.pos) != 0:
+        if tile_map.check_pos(self.pos) > 0:
             self.pos.x -= movement.x
+
+        if tile_map.check_pos(self.pos) == -1:
+            event = pygame.event.Event(pygame.USEREVENT)
+            pygame.event.post(event)
