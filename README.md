@@ -42,7 +42,7 @@ git clone https://github.com/vitorsoprani/raycasting-engine.git
 cd raycasting-engine
 
 # (opcional, mas recomendado) crie um ambiente virtual
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate      # Linux/Mac
 
 # Instale as dependências
@@ -53,7 +53,7 @@ pip install pygame
 
 ```bash
 cd src   # pasta onde está o main.py
-python main.py
+python3 main.py
 ```
 
 > O jogo abre em **tela cheia**. Para sair a qualquer momento, pressione `ESC`.
@@ -139,4 +139,4 @@ O projeto explora vários módulos centrais da biblioteca:
 ## Referências
 
 - [Artigo do Lodev sobre Raycasting](https://lodev.org/cgtutor/raycasting.html)
-- [Vídeo do javidx9 sobre Raycasting](https://youtu.be/NbSee-XM7WA?si=ZEA5PQuJbJ32UmYd)
+- [Vídeo do javidx9 sobre Raycasting e DDA](https://youtu.be/NbSee-XM7WA?si=ZEA5PQuJbJ32UmYd)
